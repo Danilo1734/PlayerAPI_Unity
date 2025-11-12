@@ -1,0 +1,77 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using PlayerAPI.Models;
+
+
+namespace PlayerAPI.Controllers
+{
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PlayerController : ControllerBase
+    {
+        private static List<Player> players = new List<Player>
+        {
+            new Player { Id = 1, Vida = 100, QuantidadesdeItens = 2, PosicaoX = 0, PosicaoY = 0, PosicaoZ = 0 }
+        };
+
+        [HttpGet]
+        public ActionResult<IEnumerable<Player>> GetPlayers()
+        {
+            return Ok(players);
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<Player>GetPlayer(int id)
+        {
+            var player = players.FirstOrDefault(p => p.Id == id);
+
+            if (player == null)
+            {
+                return NotFound("Player não encontrado.");
+            }
+
+            return Ok(player);
+        }
+
+        [HttpPost]
+        public ActionResult<Player> AddPlayer(Player novoPlayer)
+        {
+            if (players.Count > 0) novoPlayer.Id = players.Max(p => p.Id) + 1;
+            else novoPlayer.Id = 1;
+
+            players.Add(novoPlayer);
+            return CreatedAtAction(nameof(GetPlayer), new { id = novoPlayer.Id }, novoPlayer);
+        }
+
+        [HttpPut("{Id}")]
+        public IActionResult UpdatePlayer(int id, Player playerAtualizado)
+        {
+            var playerExistente = players.FirstOrDefault(p => p.Id == id);
+            if (playerExistente  == null)
+            {
+                return NotFound("Player não encontrado.");
+            }
+
+            playerExistente.Vida = playerAtualizado.Vida;
+            playerExistente.QuantidadesdeItens = playerAtualizado.QuantidadesdeItens;
+            playerExistente.PosicaoX = playerAtualizado.PosicaoX;
+            playerExistente.PosicaoY = playerAtualizado.PosicaoY;
+            playerExistente.PosicaoZ = playerAtualizado.PosicaoZ;
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeletePlayer(int id)
+        {
+            var player = players.FirstOrDefault(p =>p.Id == id);
+            if (player == null)
+            {
+                return NotFound("Player não encontrado.");
+            }
+
+            players.Remove(player);
+            return NoContent();
+        }
+    }
+}
